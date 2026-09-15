@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmarking 360° · Variedades360 vs competencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#19181a;
+    --bg-panel:#221f21;
+    --bg-panel-2:#2b2729;
+    --line:#3a3537;
+    --ink:#ece7e0;
+    --ink-dim:#a89f97;
+    --ink-faint:#786f68;
+    --brass:#c79a56;   /* Variedades360 */
+    --red:#b3272d;     /* Kartmela */
+    --steel:#5a86a3;   /* Extravagante Barber */
+    --teal:#4f8a73;    /* Royal Insumos */
+    --warn:#c79a56;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--brass);color:#1a1712;}
+  a{color:var(--brass);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:72px 0 40px;
+    border-bottom:1px solid var(--line);
+    background:
+      radial-gradient(ellipse 900px 400px at 15% -10%, rgba(199,154,86,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 100% 0%, rgba(90,134,163,0.09), transparent 60%);
+  }
+  .eyebrow-row{
+    display:flex;align-items:center;gap:10px;
+    color:var(--ink-faint);font-size:13px;margin-bottom:22px;
+  }
+  .eyebrow-row .dot{width:6px;height:6px;border-radius:50%;background:var(--brass);}
+  h1.title{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:clamp(38px,6vw,64px);
+    line-height:0.98;
+    margin:0 0 18px;
+    letter-spacing:0.2px;
+    color:var(--ink);
+  }
+  h1.title span{color:var(--brass);}
+  .hero p.lede{
+    max-width:620px;
+    font-size:17px;
+    color:var(--ink-dim);
+    margin:0 0 30px;
+  }
+  .players{
+    display:flex;flex-wrap:wrap;gap:10px;
+  }
+  .chip{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 14px;border:1px solid var(--line);border-radius:999px;
+    font-size:13.5px;background:var(--bg-panel);
+  }
+  .chip .sw{width:9px;height:9px;border-radius:50%;flex:none;}
+  .chip.own{border-color:var(--brass);}
+
+  /* ---------- SECTION GENERIC ---------- */
+  section{padding:56px 0;border-bottom:1px solid var(--line);}
+  .sec-head{margin-bottom:28px;max-width:680px;}
+  .sec-head h2{
+    font-family:'Oswald',sans-serif;
+    font-size:28px;font-weight:600;margin:0 0 10px;
+    color:var(--ink);
+  }
+  .sec-head p{color:var(--ink-dim);margin:0;font-size:15px;}
+
+  /* ---------- 3D VIS ---------- */
+  .viz-shell{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .viz-controls{
+    display:flex;flex-wrap:wrap;gap:8px;
+    padding:16px 18px;border-bottom:1px solid var(--line);
+  }
+  .metric-btn{
+    font-family:'Inter',sans-serif;
+    font-size:13px;font-weight:600;
+    background:transparent;border:1px solid var(--line);
+    color:var(--ink-dim);padding:8px 14px;border-radius:5px;
+    cursor:pointer;transition:border-color .15s, color .15s, background .15s;
+  }
+  .metric-btn:hover{border-color:var(--ink-faint);color:var(--ink);}
+  .metric-btn.active{background:var(--brass);border-color:var(--brass);color:#1a1712;}
+  #canvas-holder{
+    position:relative;
+    width:100%;height:520px;
+    cursor:grab;
+    touch-action:none;
+  }
+  #canvas-holder:active{cursor:grabbing;}
+  #canvas-holder canvas{display:block;}
+  .hint{
+    position:absolute;left:16px;bottom:14px;
+    font-size:12px;color:var(--ink-faint);
+    display:flex;align-items:center;gap:6px;
+    pointer-events:none;
+  }
+  .tooltip{
+    position:absolute;pointer-events:none;
+    background:#0f0e0f;border:1px solid var(--line);
+    padding:10px 12px;border-radius:5px;
+    font-size:13px;min-width:170px;
+    opacity:0;transform:translateY(4px);
+    transition:opacity .1s;
+    z-index:5;
+  }
+  .tooltip .tt-company{font-weight:700;font-family:'Oswald',sans-serif;letter-spacing:.2px;margin-bottom:2px;}
+  .tooltip .tt-value{font-size:20px;font-weight:700;color:var(--brass);font-variant-numeric:tabular-nums;}
+  .tooltip .tt-note{color:var(--ink-faint);font-size:11.5px;margin-top:4px;line-height:1.4;}
+  .legend{
+    display:flex;flex-wrap:wrap;gap:18px;
+    padding:14px 18px;border-top:1px solid var(--line);
+  }
+  .legend .item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-dim);}
+  .legend .sw{width:11px;height:11px;border-radius:2px;flex:none;}
+
+  /* ---------- CARDS ---------- */
+  .cards{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:16px;
+  }
+  @media(max-width:760px){.cards{grid-template-columns:1fr;}}
+  .card{
+    background:var(--bg-panel);border:1px solid var(--line);border-radius:6px;
+    padding:22px 22px 20px;position:relative;
+  }
+  .card.own{border-color:var(--brass);}
+  .card-top{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed var(--line);
+  }
+  .card-top h3{
+    font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;margin:0;
+  }
+  .card-top .tag{
+    font-size:11px;color:var(--ink-faint);border:1px solid var(--line);
+    padding:3px 8px;border-radius:999px;white-space:nowrap;
+  }
+  .card dl{margin:0;}
+  .card dl .row{
+    display:grid;grid-template-columns:108px 1fr;gap:10px;
+    padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+    font-size:13.5px;
+  }
+  .card dl .row:last-child{border-bottom:none;}
+  .card dl dt{color:var(--ink-faint);font-size:12px;padding-top:1px;}
+  .card dl dd{margin:0;color:var(--ink);}
+  .flag{color:var(--warn);font-weight:600;}
+  .card-badges{display:flex;gap:8px;align-items:center;}
+  .threat{
+    display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+    padding:3px 9px;border-radius:999px;border:1px solid;white-space:nowrap;
+  }
+  .threat.alto{color:#e6a2a2;border-color:var(--red);background:rgba(179,39,45,0.14);}
+  .threat.medio-alto{color:var(--brass);border-color:var(--brass);background:rgba(199,154,86,0.14);}
+  .threat.medio{color:#9dc0d6;border-color:var(--steel);background:rgba(90,134,163,0.14);}
+
+  /* ---------- PRICE BOARDS ---------- */
+  .price-boards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:18px;}
+  @media(max-width:760px){.price-boards{grid-template-columns:1fr;}}
+  .price-board{
+    background:var(--bg-panel);border:1px solid var(--line);border-radius:6px;
+    padding:20px 22px;
+  }
+  .price-board h4{
+    font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;margin:0 0 4px;
+  }
+  .price-board .sub{font-size:12px;color:var(--ink-faint);margin-bottom:14px;}
+  .price-row{
+    display:flex;justify-content:space-between;gap:12px;
+    padding:8px 0;border-bottom:1px dashed var(--line);
+    font-size:13.5px;
+  }
+  .price-row:last-child{border-bottom:none;}
+  .price-row .p-name{color:var(--ink-dim);}
+  .price-row .p-val{
+    font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);
+    white-space:nowrap;
+  }
+  .price-row .p-val.sinstock{color:var(--ink-faint);font-weight:600;font-size:11.5px;}
+  .alert-box{
+    background:rgba(179,39,45,0.09);border:1px solid rgba(179,39,45,0.4);
+    border-radius:6px;padding:18px 20px;margin-bottom:6px;
+  }
+  .alert-box .n{font-family:'Oswald',sans-serif;font-size:12px;color:#e6a2a2;margin-bottom:6px;letter-spacing:.3px;}
+  .alert-box p{margin:0 0 10px;font-size:14px;color:var(--ink);}
+  .alert-box p:last-child{margin-bottom:0;}
+  .alert-box b{color:var(--brass);}
+
+  /* ---------- TABLE ---------- */
+  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;}
+  table.matrix{
+    width:100%;border-collapse:collapse;min-width:760px;font-size:13.5px;
+  }
+  table.matrix th, table.matrix td{
+    padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.matrix thead th{
+    background:var(--bg-panel-2);
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;
+    position:sticky;top:0;
+  }
+  table.matrix tbody th{
+    color:var(--ink-faint);font-weight:600;font-size:12px;white-space:nowrap;
+    background:var(--bg-panel);
+  }
+  table.matrix td{color:var(--ink-dim);}
+  table.matrix tr:last-child td, table.matrix tr:last-child th{border-bottom:none;}
+  .colhead{display:flex;align-items:center;gap:7px;}
+  .colhead .sw{width:9px;height:9px;border-radius:50%;flex:none;}
+
+  /* ---------- INSIGHTS ---------- */
+  .insight-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  @media(max-width:760px){.insight-grid{grid-template-columns:1fr;}}
+  .insight{
+    background:var(--bg-panel);border:1px solid var(--line);border-left:3px solid var(--brass);
+    padding:16px 18px;border-radius:0 6px 6px 0;
+  }
+  .insight .n{font-family:'Oswald',sans-serif;color:var(--ink-faint);font-size:12px;margin-bottom:6px;}
+  .insight p{margin:0;font-size:14px;color:var(--ink);}
+  .insight p b{color:var(--brass);}
+
+  /* ---------- FOOTNOTE ---------- */
+  .footnote{padding:36px 0 64px;}
+  .footnote p{font-size:13px;color:var(--ink-faint);max-width:760px;margin:0 0 10px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow-row"><span class="dot"></span>Santiago, Chile — línea base del 10–11 de septiembre de 2026 · v2, con precios por SKU y nivel de amenaza</div>
+    <h1 class="title">Benchmarking <span>360°</span></h1>
+    <p class="lede">Cómo se ve Variedades360 al lado de Kartmela, Extravagante Barber y Royal Insumos: precios por producto, canales, redes sociales, mensajes, nivel de amenaza y quiebres de stock, reunidos en un solo mapa que se puede girar en 3D.</p>
+    <div class="players">
+      <div class="chip own"><span class="sw" style="background:var(--brass)"></span>Variedades360 (propia)</div>
+      <div class="chip"><span class="sw" style="background:var(--red)"></span>Kartmela</div>
+      <div class="chip"><span class="sw" style="background:var(--steel)"></span>Extravagante Barber</div>
+      <div class="chip"><span class="sw" style="background:var(--teal)"></span>Royal Insumos</div>
+    </div>
+  </div>
+</header>
+
+<section id="viz-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>El mapa en 3D</h2>
+      <p>Cinco métricas verificables, agrupadas por fila: seguidores, reseñas, descuento, sofisticación digital y nivel de amenaza. Arrastra para rotar, usa la rueda para acercar, y pasa el cursor sobre una barra para ver el dato exacto. Las barras en malla (sin relleno) marcan datos que ninguna tienda publica de forma verificable, o que no aplican a la marca propia.</p>
+    </div>
+    <div class="viz-shell">
+      <div class="viz-controls" id="metric-buttons"></div>
+      <div id="canvas-holder">
+        <div class="tooltip" id="tooltip"></div>
+        <div class="hint">arrastrar para rotar · rueda para zoom</div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+</section>
+
+<section id="cards-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Ficha por competidor</h2>
+      <p>Lo que cada sitio y sus redes dejan ver hoy: ubicación, canales, promesa de marca, público al que le habla, señales de confianza y el nivel de amenaza según el informe interno del equipo.</p>
+    </div>
+    <div class="cards" id="cards-holder"></div>
+  </div>
+</section>
+
+<section id="prices-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Precios por producto</h2>
+      <p>SKU a SKU, tal como aparecen publicados hoy. Kartmela bloqueó el rastreo automatizado de precios en esta ronda, así que no hay tablero propio para ellos — sus cifras de descuento (20%–38%) siguen visibles en la sección anterior porque se relevaron en el snapshot del 10 de septiembre.</p>
+    </div>
+    <div class="price-boards" id="price-boards-holder"></div>
+    <div class="alert-box" id="dorco-alert"></div>
+  </div>
+</section>
+
+<section id="table-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Tabla comparativa completa</h2>
+      <p>Todo lo relevado, fila por fila — seguidores, reseñas, descuentos, funcionalidades e-commerce, nivel de amenaza y más — incluyendo los campos donde no encontramos información pública confiable.</p>
+    </div>
+    <div class="table-scroll">
+      <table class="matrix" id="matrix-table"></table>
+    </div>
+  </div>
+</section>
+
+<section id="insights-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Lo que esto significa para Variedades360</h2>
+      <p>Siete brechas y palancas concretas que salen directo de los datos de arriba, no de supuestos.</p>
+    </div>
+    <div class="insight-grid" id="insights-holder"></div>
+  </div>
+</section>
+
+<div class="footnote">
+  <div class="wrap">
+    <p><b style="color:var(--ink-dim)">Metodología v2.</b> Línea base construida en dos pasadas: un rastreo directo de sitios, redes y reseñas de Google el 10 de septiembre de 2026, más el primer informe competitivo interno del equipo (11 de septiembre de 2026), que sumó precios por SKU, nivel de amenaza y hallazgos de Extravagante y Royal Insumos. Sigue siendo una foto única, no una serie histórica: para responder "qué productos se agotan más rápido" hace falta repetir esta misma revisión semana a semana y comparar qué SKUs cambian de disponible a agotado.</p>
+    <p>Dos datos se leen distinto entre pasadas, no se contradicen: la reseña de Facebook de Extravagante Barber (1 reseña "sin calificar") y las reseñas de Google que su propio sitio muestra (4,8★ con +160) son dos vitrinas distintas, y el rastreo directo de Kartmela.cl del 10 de septiembre sí funcionó, aunque el informe interno del equipo no logró repetirlo el 11 — por eso las cifras de descuento de Kartmela vienen de la primera pasada.</p>
+    <p>extravagantebarber.cl y royalinsumos.cl siguen bloqueando el rastreo automático directo (robots.txt); sus datos combinan resultados de búsqueda, redes sociales y el informe interno del equipo.</p>
+    <p>Donde no se encontró un dato público y verificable (seguidores de Instagram de Variedades360, calificación de Google de Royal Insumos, % de descuento de Royal Insumos), se marcó como no disponible en vez de estimarlo.</p>
+    <p><b style="color:var(--ink-dim)">Pendiente, no incluido en esta versión.</b> Colores y eslóganes de marca de la competencia, un análisis de "océano azul" con el caso Helm Bank, y un repositorio en GitHub con código QR — todo esto necesita investigación aparte; decime si lo armamos como siguiente entrega.</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const COMPANIES = [
+  { key:'v360',  name:'Variedades360', short:'V360', color:0xc79a56, own:true, threat:null,
+    ubicacion:'Sin dirección de tienda publicada — operación 100% online + WhatsApp',
+    canales:'Web (WooCommerce), Instagram, Facebook, YouTube',
+    mensaje:'"Equipamos tus manos, potenciamos tu arte" — asesoría profesional y contenido educativo',
+    publico:'Barberos profesionales que buscan asesoría técnica y stock exclusivo',
+    promos:'Banner: 15% OFF primera compra (BIENVENIDO). Pop-up del mismo sitio: 5% OFF — mensajes de descuento inconsistentes entre sí',
+    resenas:'Sin agregador de reseñas visible; solo el testimonio genérico "+500 barberos confían"',
+    eventos:'No se detectaron ferias o seminarios propios',
+    plataforma:'WordPress + WooCommerce + Slider Revolution',
+    stock:'⚠ Varias máquinas destacadas en portada (BaByliss 4Barber Roja, Barbershop 870 Gold FX, Influencer Green/Red Boost, JRL Gold, combo Wahl Magic Clip) aparecen marcadas "Vendido" en la propia home'
+  },
+  { key:'kartmela', name:'Kartmela', short:'Kartmela', color:0xb3272d, threat:'medio',
+    ubicacion:'Dos locales en Galería Santiago Centro, Alameda 949 (locales 226 y 247, 2° piso), Metro U. de Chile',
+    canales:'Web, Instagram (11K, 1.892 publicaciones), Facebook (7.242 likes), TikTok, app propia en Google Play',
+    mensaje:'"Venta hasta 70% de descuento en todos los productos" + "soporte 24/7" — oferta combinada de peluquería, belleza y barbería en un solo lugar',
+    publico:'Barberos y también público de belleza en general (línea mujer, Olaplex, Lakmé) — más amplio que solo barbería',
+    promos:'Descuentos permanentes de 20% a 38% visibles en el catálogo, cupones por app, retiro en tienda',
+    resenas:'4.8/5 con 94 reseñas de Google Maps insertadas directo en el sitio — prueba social fuerte y verificable',
+    eventos:'No se detectaron eventos propios; sí testimonios de barberías clientas (Kings Barber Studio, Senior Barbershop) y publicación frecuente de video comercial en Instagram',
+    plataforma:'WordPress + Elementor, más app móvil nativa (diferenciador claro). En este segundo relevamiento, el equipo interno no logró rastrear precios de forma automatizada (bloqueo del sitio); las cifras de descuento de este informe provienen del rastreo directo que sí completamos el 10 de septiembre',
+    stock:'Sin quiebres visibles en la vitrina principal el día del snapshot',
+    colores:'Fucsia/rosado como color de marca predominante — es el único de los tres que se aparta de los rojos y tonos oscuros del resto'
+  },
+  { key:'extravagante', name:'Extravagante Barber', short:'Extravagante', color:0x5a86a3, threat:'alto',
+    ubicacion:'Santa Beatriz #90 local 1, Providencia, Santiago — tienda física y online, despacho a todo Chile',
+    canales:'Web (WooCommerce) con comparador de productos, favoritos y asistente virtual de compra; Instagram (68K seguidores, 614 publicaciones) — el mayor alcance social del grupo; Facebook con poca actividad',
+    mensaje:'"Potenciar la confianza y el éxito de los profesionales" — línea premium + mobiliario (sillones), venta mayorista y al detalle separadas, y declara atender a más de 10.000 barberos',
+    publico:'Barberías/salones que equipan el local completo (mobiliario + insumos) y distribuidores mayoristas',
+    promos:'10% OFF primera compra, envío gratis sobre $30.000, gift card (paga $100.000 y recibe $120.000), 2 cajas Dorco Prime por $15.000, Trimmer Gamma Evo de $149.990 a $89.990 (-40%), soplador inalámbrico de $79.900 a $59.990 (-25%), combo WMARK clipper+trimmer+shaver por $259.990',
+    resenas:'Su sitio muestra 4,8★ con más de 160 reseñas de Google (según el informe interno del equipo); su página de Facebook, en cambio, mostraba apenas 1 reseña "sin calificar" al momento de nuestra primera revisión — dos vitrinas de confianza con resultados muy distintos',
+    eventos:'✔ Organiza/participa en seminarios de barbería con demostraciones en vivo y embajadores de marca',
+    plataforma:'WordPress + WooCommerce, con comparador de productos, lista de favoritos y asistente virtual de compra — funcionalidades e-commerce más avanzadas que el resto del grupo (rastreo directo del sitio sigue bloqueado por robots.txt)',
+    stock:'Wahl Senior Cordless sin stock ($119.990); el resto de los quiebres no es determinable desde el snapshot público',
+    colores:'Rojos y tonos oscuros — en línea con la mayoría de la competencia'
+  },
+  { key:'royal', name:'Royal Insumos', short:'Royal', color:0x4f8a73, threat:'medio-alto',
+    ubicacion:'Santiago 1130, Santiago Centro — reabrió su tienda física; despacho el mismo día en la Región Metropolitana para pedidos antes de las 14:00, más envíos a todo Chile',
+    canales:'Web sobre Mercado Shops (ecosistema Mercado Libre), Instagram (15K seguidores, 136 publicaciones, sigue a 2.940 cuentas)',
+    mensaje:'"Tu pasión es cortar, la nuestra es equiparte con lo mejor" — tono cercano, énfasis en envíos el mismo día y garantía de 6 meses',
+    publico:'Barberos y "lady barbers" — mención explícita del segmento femenino del oficio',
+    promos:'Cupón de descuento por suscripción de correo, sin % publicado; venta por mayor y detalle; está incorporando las líneas Pion Professional, Lorenti y Roqvel',
+    resenas:'Sin agregador de reseñas propio visible en el snapshot',
+    eventos:'✔ Participó o anunció participación en la Feria de Proveedores de Belleza y en una Batalla de Barberos',
+    plataforma:'Mercado Shops — checkout y logística integrados, pero menos control de marca y SEO propio que un sitio independiente (rastreo directo bloqueado por robots.txt)',
+    stock:'Aparecen agotados la cera Level3 Matte Putty y varios productos Pro Rapid Men — confirma falta de stock puntual, no la velocidad a la que se agotaron',
+    colores:'Rojos y tonos oscuros — en línea con la mayoría de la competencia'
+  },
+];
+
+/* Listas de precios por producto, tal como las releva el informe interno del equipo (11 sept 2026).
+   Kartmela no tiene tablero propio en esta ronda: su sitio bloqueó el rastreo automatizado de precios. */
+const PRICE_BOARDS = [
+  { company:'extravagante', title:'Extravagante Barber', sub:'Máquinas — precios de catálogo',
+    items:[
+      ['Wahl Magic Clip Cordless','$114.990'],
+      ['Wahl Magic Clip Gold','$165.000'],
+      ['Wahl Senior Cordless','$119.990', true],
+      ['Wahl Vapor Switch','$219.990'],
+      ['WMARK NG-01','$99.990'],
+      ['WMARK NG-8004','$89.990'],
+      ['MRD Smartbrain Clipper','$175.000–$184.990'],
+      ['MRD Smartbrain Trimmer','$139.990'],
+      ['Kemei KM-1863','$59.990'],
+      ['JRL Onyx Trimmer','$139.990'],
+      ['Dorco Prime, 2 cajas','$15.000'],
+    ]
+  },
+  { company:'royal', title:'Royal Insumos', sub:'Insumos y línea de estilizado',
+    items:[
+      ['Cera Level3, 150 ml','$11.000'],
+      ['After Shave Level3, 400 ml','$11.000'],
+      ['Polvo Level3, 30 g','$11.000'],
+      ['Cera Pro Rapid Men','$5.990'],
+      ['Polvo Pro Rapid Men','$5.990'],
+      ['Laca Pro Rapid Men','$5.990'],
+      ['Polvo Roqvel','$9.000'],
+      ['Polvo Lorenti','$8.000'],
+      ['Cera Roqvel','$9.000–$13.000'],
+      ['Polvo Rolda','$14.990'],
+    ]
+  },
+];
+
+const METRICS = [
+  { key:'ig', label:'Seguidores en Instagram', unit:'K', fmt:(v)=>v===null?'N/D':v.toLocaleString('es-CL')+' K',
+    values:{ v360:null, kartmela:11, extravagante:68, royal:15 },
+    note:'Variedades360: cifra no publicada de forma verificable en el snapshot.' },
+  { key:'reviews', label:'Rating de Google (reseñas)', unit:'★',
+    counts:{ kartmela:94, extravagante:160 },
+    fmt:function(v,k){ if(v===null) return 'N/D'; const c=this.counts[k]; return v+'★'+(c?` (${c})`:''); },
+    values:{ v360:null, kartmela:4.8, extravagante:4.8, royal:null },
+    note:'Kartmela: 94 reseñas de Google en su sitio. Extravagante: +160 reseñas de Google según el informe del equipo — su Facebook, en cambio, casi no tiene reseñas propias.' },
+  { key:'discount', label:'Descuento de bienvenida / primera compra', unit:'%', fmt:v=>v===null?'N/D':v+'%',
+    values:{ v360:15, kartmela:70, extravagante:10, royal:null },
+    note:'Kartmela: "hasta 70%" es descuento de catálogo, no solo de primera compra. Royal Insumos ofrece cupón de bienvenida sin porcentaje publicado.' },
+  { key:'digital', label:'Funcionalidades e-commerce avanzadas', unit:'', fmt:v=>v===null?'N/D':v+' de 4',
+    values:{ v360:0, kartmela:1, extravagante:3, royal:0 },
+    note:'Cuenta: comparador de productos, lista de favoritos, asistente virtual de compra, app móvil propia.' },
+  { key:'amenaza', label:'Nivel de amenaza (informe del equipo)', unit:'', fmt:v=>v===null?'N/D':({1:'Medio',2:'Medio-alto',3:'Alto'})[v],
+    values:{ v360:null, kartmela:1, extravagante:3, royal:2 },
+    note:'No aplica a Variedades360, que es la marca propia y no una amenaza externa.' },
+];
+
+/* ============================================================
+   METRIC BUTTONS + LEGEND
+   ============================================================ */
+const btnHolder = document.getElementById('metric-buttons');
+let activeMetric = METRICS[0].key;
+
+function renderButtons(){
+  btnHolder.innerHTML = '<button class="metric-btn" data-m="__all__">Vista general</button>' +
+    METRICS.map(m=>`<button class="metric-btn" data-m="${m.key}">${m.label}</button>`).join('');
+  btnHolder.querySelectorAll('.metric-btn').forEach(b=>{
+    if(b.dataset.m === '__all__') b.classList.add('active');
+    b.addEventListener('click', ()=>{
+      btnHolder.querySelectorAll('.metric-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      focusMetric(b.dataset.m);
+    });
+  });
+}
+renderButtons();
+
+const legendHolder = document.getElementById('legend');
+legendHolder.innerHTML = COMPANIES.map(c=>`<div class="item"><span class="sw" style="background:#${c.color.toString(16).padStart(6,'0')}"></span>${c.name}${c.own?' (propia)':''}</div>`).join('') +
+  `<div class="item"><span class="sw" style="background:transparent;border:1px solid var(--ink-faint)"></span>Malla = dato no disponible</div>`;
+
+/* ============================================================
+   THREE.JS SCENE
+   ============================================================ */
+const holder = document.getElementById('canvas-holder');
+const tooltip = document.getElementById('tooltip');
+
+let W = holder.clientWidth, H = holder.clientHeight;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x221f21);
+scene.fog = new THREE.Fog(0x221f21, 14, 30);
+
+const camera = new THREE.PerspectiveCamera(38, W/H, 0.1, 100);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(W, H);
+holder.insertBefore(renderer.domElement, holder.firstChild);
+
+// lights
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const key = new THREE.DirectionalLight(0xffffff, 0.9);
+key.position.set(6, 10, 6);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x5a86a3, 0.35);
+rim.position.set(-6, 4, -6);
+scene.add(rim);
+
+// floor grid
+const gridSize = 16;
+const grid = new THREE.GridHelper(gridSize, 24, 0x4a4446, 0x332f31);
+grid.position.y = 0;
+scene.add(grid);
+
+const floorMat = new THREE.MeshBasicMaterial({ color:0x1c1a1b, transparent:true, opacity:0.9 });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(gridSize, gridSize), floorMat);
+floor.rotation.x = -Math.PI/2;
+floor.position.y = -0.005;
+scene.add(floor);
+
+/* ---- layout ---- */
+const nCompanies = COMPANIES.length;
+const nMetrics = METRICS.length;
+const cellX = 1.5;
+const cellZ = 1.7;
+const barW = 0.72;
+const barD = 0.72;
+const maxH = 3.4;
+
+const originX = -((nCompanies-1)*cellX)/2;
+const originZ = -((nMetrics-1)*cellZ)/2;
+
+function makeTextSprite(text, opts={}){
+  const {fontsize=48, color='#ece7e0', weight=600, family='Inter, sans-serif', padding=10, bg=null} = opts;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.font = `${weight} ${fontsize}px ${family}`;
+  const metricsW = ctx.measureText(text).width;
+  canvas.width = metricsW + padding*2;
+  canvas.height = fontsize*1.5 + padding;
+  ctx.font = `${weight} ${fontsize}px ${family}`;
+  if(bg){ ctx.fillStyle = bg; ctx.fillRect(0,0,canvas.width,canvas.height); }
+  ctx.fillStyle = color;
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, padding, canvas.height/2);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false });
+  const sprite = new THREE.Sprite(mat);
+  const scale = 0.0072;
+  sprite.scale.set(canvas.width*scale, canvas.height*scale, 1);
+  sprite.renderOrder = 10;
+  return sprite;
+}
+
+const barGroup = new THREE.Group();
+scene.add(barGroup);
+const bars = []; // {mesh, company, metric, value}
+
+METRICS.forEach((metric, mi)=>{
+  const z = originZ + mi*cellZ;
+
+  // row label (left of row)
+  const rowLabel = makeTextSprite(metric.label, {fontsize:30, color:'#c79a56', weight:700});
+  rowLabel.position.set(originX - 1.65, 0.55, z);
+  scene.add(rowLabel);
+
+  const maxVal = Math.max(...Object.values(metric.values).filter(v=>v!==null));
+
+  COMPANIES.forEach((co, ci)=>{
+    const x = originX + ci*cellX;
+    const raw = metric.values[co.key];
+    const isND = raw === null;
+    const norm = isND ? 0.045 : Math.max(0.06, (raw/maxVal));
+    const h = norm * maxH;
+
+    const geo = new THREE.BoxGeometry(barW, h, barD);
+    let mesh;
+    if(isND){
+      const mat = new THREE.MeshBasicMaterial({ color: co.color, wireframe:true, transparent:true, opacity:0.55 });
+      mesh = new THREE.Mesh(geo, mat);
+    } else {
+      const mat = new THREE.MeshStandardMaterial({ color: co.color, roughness:0.45, metalness:0.18 });
+      mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = false;
+    }
+    mesh.position.set(x, h/2, z);
+    barGroup.add(mesh);
+    bars.push({ mesh, company:co, metric, value:raw, isND, baseH:h, baseY:h/2 });
+
+    // value label on top
+    const label = isND ? 'N/D' : metric.fmt(raw, co.key);
+    const valSprite = makeTextSprite(label, { fontsize:34, color: isND ? '#786f68' : '#ece7e0', weight:700 });
+    valSprite.position.set(x, h + 0.34, z);
+    barGroup.add(valSprite);
+    mesh.userData.labelSprite = valSprite;
+  });
+});
+
+// company labels along front
+COMPANIES.forEach((co, ci)=>{
+  const x = originX + ci*cellX;
+  const sprite = makeTextSprite(co.short, { fontsize:30, color:'#'+co.color.toString(16).padStart(6,'0'), weight:700 });
+  sprite.position.set(x, -0.55, originZ + (nMetrics-1)*cellZ + 1.55);
+  scene.add(sprite);
+});
+
+/* ---- camera / custom orbit controls ---- */
+const target = new THREE.Vector3(0, 0.9, 0);
+let radius = 10.5, theta = Math.PI/4, phi = 1.02; // spherical around target
+let targetRadius = radius, targetTheta = theta, targetPhi = phi;
+
+function updateCamera(){
+  camera.position.x = target.x + radius * Math.sin(phi) * Math.sin(theta);
+  camera.position.z = target.z + radius * Math.sin(phi) * Math.cos(theta);
+  camera.position.y = target.y + radius * Math.cos(phi);
+  camera.lookAt(target);
+}
+updateCamera();
+
+let dragging = false, lastX=0, lastY=0;
+holder.addEventListener('pointerdown', e=>{
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  holder.setPointerCapture(e.pointerId);
+});
+holder.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  targetTheta -= dx * 0.006;
+  targetPhi = Math.min(Math.max(targetPhi - dy*0.006, 0.35), 1.45);
+});
+holder.addEventListener('pointerup', e=>{ dragging=false; });
+holder.addEventListener('pointerleave', ()=>{ dragging=false; });
+holder.addEventListener('wheel', e=>{
+  e.preventDefault();
+  targetRadius = Math.min(Math.max(targetRadius + e.deltaY*0.012, 5), 20);
+}, { passive:false });
+
+/* ---- camera presets per metric ---- */
+function focusMetric(key){
+  if(key === '__all__'){
+    targetTheta = Math.PI/4; targetPhi = 1.02; targetRadius = 10.5;
+    return;
+  }
+  const idx = METRICS.findIndex(m=>m.key===key);
+  const frac = nMetrics<=1?0.5:idx/(nMetrics-1);
+  targetTheta = Math.PI/2 - 0.35;
+  targetPhi = 0.72;
+  targetRadius = 7.6;
+  // slight z pan handled via target
+  targetPanZ = originZ + idx*cellZ;
+}
+let targetPanZ = 0;
+
+/* ---- raycasting for hover ---- */
+const raycaster = new THREE.Raycaster();
+const pointerNDC = new THREE.Vector2();
+let hovered = null;
+
+holder.addEventListener('pointermove', e=>{
+  const rect = holder.getBoundingClientRect();
+  pointerNDC.x = ((e.clientX-rect.left)/rect.width)*2-1;
+  pointerNDC.y = -((e.clientY-rect.top)/rect.height)*2+1;
+});
+
+function checkHover(){
+  raycaster.setFromCamera(pointerNDC, camera);
+  const meshes = bars.map(b=>b.mesh);
+  const hits = raycaster.intersectObjects(meshes);
+  if(hits.length){
+    const bar = bars.find(b=>b.mesh === hits[0].object);
+    if(bar !== hovered){
+      hovered = bar;
+      showTooltip(bar);
+    }
+    positionTooltip(hits[0].point);
+  } else if(hovered){
+    hovered = null;
+    tooltip.style.opacity = 0;
+  }
+}
+
+function showTooltip(bar){
+  tooltip.style.opacity = 1;
+  const colorHex = '#'+bar.company.color.toString(16).padStart(6,'0');
+  tooltip.innerHTML = `
+    <div class="tt-company" style="color:${colorHex}">${bar.company.name}</div>
+    <div style="color:var(--ink-dim);font-size:12px;margin-bottom:4px;">${bar.metric.label}</div>
+    <div class="tt-value">${bar.isND ? 'N/D' : bar.metric.fmt(bar.value, bar.company.key)}</div>
+    <div class="tt-note">${bar.isND ? bar.metric.note : ''}</div>
+  `;
+}
+function positionTooltip(point3d){
+  const v = point3d.clone().project(camera);
+  const x = (v.x*0.5+0.5)*W;
+  const y = (-v.y*0.5+0.5)*H;
+  tooltip.style.left = Math.min(x+14, W-190) + 'px';
+  tooltip.style.top = Math.max(y-70, 6) + 'px';
+}
+
+/* ---- resize ---- */
+function onResize(){
+  W = holder.clientWidth; H = holder.clientHeight;
+  camera.aspect = W/H;
+  camera.updateProjectionMatrix();
+  renderer.setSize(W, H);
+}
+window.addEventListener('resize', onResize);
+
+/* ---- animation loop ---- */
+function animate(){
+  requestAnimationFrame(animate);
+  theta += (targetTheta - theta) * 0.09;
+  phi += (targetPhi - phi) * 0.09;
+  radius += (targetRadius - radius) * 0.09;
+  target.z += (targetPanZ - target.z) * 0.09;
+  updateCamera();
+  checkHover();
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+const cardsHolder = document.getElementById('cards-holder');
+const THREAT_LABEL = { alto:'Amenaza alta', 'medio-alto':'Amenaza medio-alta', medio:'Amenaza media' };
+cardsHolder.innerHTML = COMPANIES.map(co=>`
+  <div class="card ${co.own?'own':''}">
+    <div class="card-top">
+      <h3 style="color:#${co.color.toString(16).padStart(6,'0')}">${co.name}</h3>
+      <div class="card-badges">
+        ${co.threat ? `<span class="threat ${co.threat}">${THREAT_LABEL[co.threat]}</span>` : ''}
+        <span class="tag">${co.own?'Tienda propia':'Competidor'}</span>
+      </div>
+    </div>
+    <dl>
+      <div class="row"><dt>Ubicación</dt><dd>${co.ubicacion}</dd></div>
+      <div class="row"><dt>Canales</dt><dd>${co.canales}</dd></div>
+      <div class="row"><dt>Mensaje central</dt><dd>${co.mensaje}</dd></div>
+      <div class="row"><dt>Público objetivo</dt><dd>${co.publico}</dd></div>
+      <div class="row"><dt>Promociones</dt><dd>${co.promos}</dd></div>
+      <div class="row"><dt>Reseñas</dt><dd>${co.resenas}</dd></div>
+      <div class="row"><dt>Ferias / eventos</dt><dd>${co.eventos}</dd></div>
+      <div class="row"><dt>Plataforma</dt><dd>${co.plataforma}</dd></div>
+      <div class="row"><dt>Stock observado</dt><dd class="${co.stock.startsWith('⚠')?'flag':''}">${co.stock}</dd></div>
+      ${co.colores ? `<div class="row"><dt>Colores de marca</dt><dd>${co.colores}</dd></div>` : ''}
+    </dl>
+  </div>
+`).join('');
+
+/* ============================================================
+   PRICE BOARDS + DORCO PRIME ALERT
+   ============================================================ */
+const boardsHolder = document.getElementById('price-boards-holder');
+boardsHolder.innerHTML = PRICE_BOARDS.map(board=>{
+  const co = COMPANIES.find(c=>c.key===board.company);
+  const colorHex = '#'+co.color.toString(16).padStart(6,'0');
+  return `
+    <div class="price-board">
+      <h4 style="color:${colorHex}">${board.title}</h4>
+      <div class="sub">${board.sub}</div>
+      ${board.items.map(([name, price, sinStock])=>`
+        <div class="price-row">
+          <span class="p-name">${name}</span>
+          <span class="p-val ${sinStock?'sinstock':''}">${sinStock ? price+' · sin stock' : price}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}).join('');
+
+document.getElementById('dorco-alert').innerHTML = `
+  <div class="n">ALERTA DE PRECIO</div>
+  <p>Variedades360 vende su caja de hojillas Dorco Prime a <b>~$9.800</b>, mientras Extravagante Barber ofrece <b>2 cajas por $15.000</b> (~$7.500 por unidad) — un precio unitario cerca de <b>23,5% más bajo</b>.</p>
+  <p>No se recomienda igualar 1 a 1 y perder margen. Una alternativa: precio propio de <b>2 cajas entre $17.000 y $17.990</b>, sumando un beneficio agregado (entrega en ruta o un producto económico de regalo) en vez de competir solo por precio.</p>
+  <p style="color:var(--ink-faint);font-size:12.5px;">Nota: el "caja" de $9.800 de este informe y la caja de 100×10 (1.000 unidades) que Variedades360 muestra en su propio sitio podrían no ser el mismo formato — conviene confirmar el tamaño exacto de envase antes de fijar el precio del combo.</p>
+`;
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+const M = key => METRICS.find(m=>m.key===key);
+const rows = [
+  ['Ubicación física', c=>c.ubicacion],
+  ['Canales digitales', c=>c.canales],
+  ['Seguidores Instagram', c=>M('ig').fmt(M('ig').values[c.key], c.key)],
+  ['Rating Google', c=>M('reviews').fmt(M('reviews').values[c.key], c.key)],
+  ['Descuento destacado', c=>M('discount').fmt(M('discount').values[c.key], c.key)],
+  ['Funcionalidades e-commerce', c=>M('digital').fmt(M('digital').values[c.key], c.key)],
+  ['Nivel de amenaza', c=>c.threat ? THREAT_LABEL[c.threat].replace('Amenaza ','') : 'No aplica (propia)'],
+  ['Plataforma web', c=>c.plataforma],
+  ['Mensaje central', c=>c.mensaje],
+  ['Público objetivo', c=>c.publico],
+  ['Ferias / eventos', c=>c.eventos],
+  ['Quiebres de stock detectados', c=>c.stock],
+  ['Colores de marca', c=>c.colores || 'No evaluado en este informe'],
+];
+const table = document.getElementById('matrix-table');
+table.innerHTML = `
+  <thead><tr>
+    <th></th>
+    ${COMPANIES.map(c=>`<th><div class="colhead"><span class="sw" style="background:#${c.color.toString(16).padStart(6,'0')}"></span>${c.name}</div></th>`).join('')}
+  </tr></thead>
+  <tbody>
+    ${rows.map(([label, fn])=>`
+      <tr><th>${label}</th>${COMPANIES.map(c=>`<td>${fn(c)}</td>`).join('')}</tr>
+    `).join('')}
+  </tbody>
+`;
+
+/* ============================================================
+   INSIGHTS
+   ============================================================ */
+const insights = [
+  '<b>Acción 1 —</b> Lanzar un pack propio de 2 cajas Dorco Prime (idealmente $17.000–$17.990) sin destruir el margen, en vez de igualar el $15.000 de Extravagante SKU por SKU.',
+  '<b>Acción 2 —</b> Comunicar en la web e Instagram: "Abastecimiento directo para barberos, crédito semanal y entregas programadas" — la ventaja de atención directa que hoy ningún competidor explota.',
+  '<b>Acción 3 —</b> Crear una sección permanente de packs profesionales con reposición semanal, quincenal y mensual, apoyada en la relación directa con el barbero.',
+  'Extravagante Barber es hoy la <b>amenaza más alta</b> del grupo: tienda física y online, +10.000 barberos declarados, comparador de productos, favoritos y asistente virtual de compra — la web más sofisticada de las tres.',
+  'Royal Insumos subió a <b>amenaza medio-alta</b>: reabrió tienda física, despacho el mismo día en RM, suma las líneas Pion Professional, Lorenti y Roqvel, y participó en la Feria de Proveedores de Belleza y en una Batalla de Barberos — está construyendo comunidad, no solo precio.',
+  'El banner de portada de Variedades360 ofrece <b>15% OFF</b> y el pop-up del mismo sitio ofrece <b>5% OFF</b> — antes de invertir en tráfico pagado conviene unificar ese mensaje.',
+  'Varias máquinas que Variedades360 destaca en su propia portada aparecen <b>marcadas "Vendido"</b> — son justo los productos donde más vale priorizar reposición.',
+  'Kartmela (4,8★/94) y ahora Extravagante (4,8★/+160 según su sitio) exhiben reseñas de Google como prueba social. Variedades360 no muestra ningún agregador de reseñas propio hoy.',
+  'Los tres competidores publican una <b>dirección física</b>; Variedades360 no muestra ninguna. Un punto de retiro o alianza local ayudaría a la confianza y al SEO local (Google Business, mapas).',
+  'En paleta de marca, Extravagante y Royal se mueven en <b>rojos y tonos oscuros</b>; Kartmela es la excepción con <b>fucsia/rosado</b>. Ningún competidor ocupa hoy un tono cálido tipo dorado/bronce — el que usa este informe para Variedades360.',
+];
+document.getElementById('insights-holder').innerHTML = insights.map((t,i)=>`
+  <div class="insight"><div class="n">0${i+1}</div><p>${t}</p></div>
+`).join('');
+</script>
+</body>
+</html>
